@@ -38,7 +38,7 @@ static void acquireLock() {
   DEBUG_PRINTF("acquired LOCK_EX lock on fd %d\n", fd);
 }
 
-static off_t getOutputFileBytes() {
+static size_t getOutputFileBytes() {
   off_t bytes = 0;
   struct stat s;
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
   ssize_t writeRetVal;
   size_t bytesWritten;
   int intRetVal;
-  off_t outputFileSize;
+  size_t outputFileSize;
 
   if (argc > 1) {
     DEBUG_PRINTF("chdir %s\n", argv[1]);
