@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     readRetVal = read(STDIN_FILENO, buffer, sizeof(buffer));
     if (readRetVal == 0) {
       DEBUG_PRINTF("read returned 0\n");
-      exit(1);
+      exit(0);
     } else if (readRetVal < 0) {
       DEBUG_PRINTF("read returned < 0 errno = %s\n", strerror(errno));
       exit(1);
