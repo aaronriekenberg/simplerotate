@@ -54,10 +54,6 @@ static void rotateFiles() {
   char fileName2[20];
   int i;
 
-  sprintf(fileName1, OUTPUT_FILE_NAME ".%d", MAX_FILES - 1);
-  DEBUG_PRINTF("unlink %s\n", fileName1);
-  unlink(fileName1);
-
   for (i = MAX_FILES - 1; i >= 2; --i) {
     sprintf(fileName1, OUTPUT_FILE_NAME ".%d", i - 1);
     sprintf(fileName2, OUTPUT_FILE_NAME ".%d", i);
