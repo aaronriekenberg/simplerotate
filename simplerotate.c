@@ -50,8 +50,8 @@ static size_t getOutputFileBytes() {
 }
 
 static void rotateFiles() {
-  char fileName1[20];
-  char fileName2[20];
+  char fileName1[10];
+  char fileName2[10];
   int i;
 
   for (i = MAX_FILES - 1; i >= 2; --i) {
