@@ -106,8 +106,8 @@ int main(int argc, char** argv) {
     }
 
     DEBUG_PRINTF("read returned %zd\n", readRetVal);
+    bytesWritten = 0;
     do {
-      bytesWritten = 0;
       writeRetVal = write(outputFD, buffer + bytesWritten, readRetVal);
       if (writeRetVal < 0) {
         DEBUG_PRINTF("write returned < 0 errno = %s\n", strerror(errno));
