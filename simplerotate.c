@@ -23,7 +23,7 @@ static void acquireLock() {
 
   DEBUG_PRINTF("acquireLock\n");
 
-  fd = open(LOCK_FILE_NAME, O_CREAT | O_WRONLY, 0644);
+  fd = open(LOCK_FILE_NAME, O_TRUNC | O_CREAT | O_WRONLY, 0644);
   if (fd < 0) {
     DEBUG_PRINTF("error opening lock errno = %s\n", strerror(errno));
     exit(1);
