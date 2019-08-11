@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
         if (intRetVal < 0) {
           DEBUG_PRINTF("close returned < 0 errno = %s\n", strerror(errno));
           exit(1);
-	}
+        }
 
         rotateFiles();       
         outputFileSize = 0;
