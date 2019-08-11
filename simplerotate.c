@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
         rotateFiles();       
         outputFileSize = 0;
 
-        outputFD = open(OUTPUT_FILE_NAME, O_CREAT | O_WRONLY, 0644);
+        outputFD = open(OUTPUT_FILE_NAME, O_TRUNC | O_CREAT | O_WRONLY, 0644);
         if (outputFD < 0) {
           DEBUG_PRINTF("error opening output errno = %s\n", strerror(errno));
           exit(1);
