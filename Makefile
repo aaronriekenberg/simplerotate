@@ -1,5 +1,5 @@
 CC = cc
-CFLAGS = -Os -g -Wall
+CFLAGS = -g -Wall
 LDFLAGS =
 
 SRC = simplerotate.c
