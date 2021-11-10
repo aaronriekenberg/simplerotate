@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -50,18 +51,34 @@ static size_t getOutputFileBytes() {
 }
 
 static void rotateFiles() {
-  char fileName1[10];
-  char fileName2[10];
+  char fileName1[PATH_MAX];
+  char fileName2[PATH_MAX];
   int i;
+  int len;
 
   for (i = MAX_FILES - 1; i >= 2; --i) {
-    sprintf(fileName1, OUTPUT_FILE_NAME ".%d", i - 1);
-    sprintf(fileName2, OUTPUT_FILE_NAME ".%d", i);
+    len = snprintf(fileName1, sizeof(fileName1), OUTPUT_FILE_NAME ".%d", i - 1);
+    if ((len < 0) || (len >= sizeof(fileName1))) {
+      DEBUG_PRINTF("fileName1 too long i = %d\n", i);
+      exit(1);
+    }
+
+    len = snprintf(fileName2, sizeof(fileName2), OUTPUT_FILE_NAME ".%d", i);
+    if ((len < 0) || (len >= sizeof(fileName2))) {
+      DEBUG_PRINTF("fileName2 too long i = %d\n", i);
+      exit(1);
+    }
+
     DEBUG_PRINTF("rename %s %s\n", fileName1, fileName2);
     rename(fileName1, fileName2);
   }
 
-  sprintf(fileName1, OUTPUT_FILE_NAME ".%d", 1);
+  len = snprintf(fileName1, sizeof(fileName1), OUTPUT_FILE_NAME ".%d", 1);
+  if ((len < 0) || (len >= sizeof(fileName1))) {
+    DEBUG_PRINTF("fileName1 too long i = 1");
+    exit(1);
+  }
+
   DEBUG_PRINTF("rename %s %s\n", OUTPUT_FILE_NAME, fileName1);
   rename(OUTPUT_FILE_NAME, fileName1);
 }
