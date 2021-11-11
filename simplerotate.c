@@ -50,37 +50,31 @@ static size_t getOutputFileBytes() {
   return bytes;
 }
 
+struct RotationInfo {
+  const char* fromFilename;
+  const char* toFilename;
+};
+
+static const struct RotationInfo rotationInfoArray[] = {
+  { .fromFilename = OUTPUT_FILE_NAME ".8", .toFilename = OUTPUT_FILE_NAME ".9" },
+  { .fromFilename = OUTPUT_FILE_NAME ".7", .toFilename = OUTPUT_FILE_NAME ".8" },
+  { .fromFilename = OUTPUT_FILE_NAME ".6", .toFilename = OUTPUT_FILE_NAME ".7" },
+  { .fromFilename = OUTPUT_FILE_NAME ".5", .toFilename = OUTPUT_FILE_NAME ".6" },
+  { .fromFilename = OUTPUT_FILE_NAME ".4", .toFilename = OUTPUT_FILE_NAME ".5" },
+  { .fromFilename = OUTPUT_FILE_NAME ".3", .toFilename = OUTPUT_FILE_NAME ".4" },
+  { .fromFilename = OUTPUT_FILE_NAME ".2", .toFilename = OUTPUT_FILE_NAME ".3" },
+  { .fromFilename = OUTPUT_FILE_NAME ".1", .toFilename = OUTPUT_FILE_NAME ".2" },
+  { .fromFilename = OUTPUT_FILE_NAME,      .toFilename = OUTPUT_FILE_NAME ".1" },
+  { .fromFilename = NULL, .toFilename = NULL }
+};
+
 static void rotateFiles() {
-  char fileName1[PATH_MAX];
-  char fileName2[PATH_MAX];
-  int i;
-  int len;
+  const struct RotationInfo* rotationInfo = rotationInfoArray;
 
-  for (i = MAX_FILES - 1; i >= 2; --i) {
-    len = snprintf(fileName1, sizeof(fileName1), OUTPUT_FILE_NAME ".%d", i - 1);
-    if ((len < 0) || (len >= sizeof(fileName1))) {
-      DEBUG_PRINTF("fileName1 too long i = %d\n", i);
-      exit(1);
-    }
-
-    len = snprintf(fileName2, sizeof(fileName2), OUTPUT_FILE_NAME ".%d", i);
-    if ((len < 0) || (len >= sizeof(fileName2))) {
-      DEBUG_PRINTF("fileName2 too long i = %d\n", i);
-      exit(1);
-    }
-
-    DEBUG_PRINTF("rename %s %s\n", fileName1, fileName2);
-    rename(fileName1, fileName2);
+  while (rotationInfo->fromFilename != NULL) {
+    rename(rotationInfo->fromFilename, rotationInfo->toFilename);
+    ++rotationInfo;
   }
-
-  len = snprintf(fileName1, sizeof(fileName1), OUTPUT_FILE_NAME ".%d", 1);
-  if ((len < 0) || (len >= sizeof(fileName1))) {
-    DEBUG_PRINTF("fileName1 too long i = 1");
-    exit(1);
-  }
-
-  DEBUG_PRINTF("rename %s %s\n", OUTPUT_FILE_NAME, fileName1);
-  rename(OUTPUT_FILE_NAME, fileName1);
 }
 
 int main(int argc, char** argv) {
