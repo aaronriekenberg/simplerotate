@@ -67,6 +67,20 @@ static const struct RotationInfo rotationInfoArray[] = {
   { .fromFilename = NULL, .toFilename = NULL }
 };
 
+static void logRotationInfo() {
+  if (DEBUG_ENABLED) {
+    int i = 0;
+    const struct RotationInfo* rotationInfo = rotationInfoArray;
+    while (rotationInfo->fromFilename != NULL) {
+      DEBUG_PRINTF(
+        "rotationInfo[%d] = { fromFilename = %s, toFilename = %s }\n",
+        i, rotationInfo->fromFilename, rotationInfo->toFilename);
+      ++rotationInfo;
+      ++i;
+    }
+  }
+}
+
 static void rotateFiles() {
   const struct RotationInfo* rotationInfo = rotationInfoArray;
 
@@ -84,6 +98,8 @@ int main(int argc, char** argv) {
   size_t bytesWritten;
   int intRetVal;
   size_t outputFileSize;
+
+  logRotationInfo();
 
   if (argc > 1) {
     DEBUG_PRINTF("chdir %s\n", argv[1]);
