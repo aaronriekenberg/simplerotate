@@ -1,1 +1,2 @@
-simplerotate.o: simplerotate.c
+sds.o: sds.c sds.h sdsalloc.h
+simplerotate.o: simplerotate.c sds.h

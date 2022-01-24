@@ -8,12 +8,15 @@
 #include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/queue.h>
 #include <unistd.h>
+#include "sds.h"
 
 #define DEBUG_ENABLED 0
 #define LOCK_FILE_NAME "lock"
 #define OUTPUT_FILE_NAME "output"
 #define MAX_OUTPUT_FILE_SIZE_BYTES (1 * 1024 * 1024)
+#define MAX_OUTPUT_FILES (10)
 
 #define DEBUG_PRINTF(fmt, ...) do { if (DEBUG_ENABLED) printf(fmt, ##__VA_ARGS__); } while (0)
 
@@ -50,43 +53,74 @@ static size_t getOutputFileBytes() {
 }
 
 struct RotationInfo {
-  const char* fromFilename;
-  const char* toFilename;
+  sds fromFilename;
+  sds toFilename;
+  SIMPLEQ_ENTRY(RotationInfo) entry;
 };
 
-static const struct RotationInfo rotationInfoArray[] = {
-  { .fromFilename = OUTPUT_FILE_NAME ".8", .toFilename = OUTPUT_FILE_NAME ".9" },
-  { .fromFilename = OUTPUT_FILE_NAME ".7", .toFilename = OUTPUT_FILE_NAME ".8" },
-  { .fromFilename = OUTPUT_FILE_NAME ".6", .toFilename = OUTPUT_FILE_NAME ".7" },
-  { .fromFilename = OUTPUT_FILE_NAME ".5", .toFilename = OUTPUT_FILE_NAME ".6" },
-  { .fromFilename = OUTPUT_FILE_NAME ".4", .toFilename = OUTPUT_FILE_NAME ".5" },
-  { .fromFilename = OUTPUT_FILE_NAME ".3", .toFilename = OUTPUT_FILE_NAME ".4" },
-  { .fromFilename = OUTPUT_FILE_NAME ".2", .toFilename = OUTPUT_FILE_NAME ".3" },
-  { .fromFilename = OUTPUT_FILE_NAME ".1", .toFilename = OUTPUT_FILE_NAME ".2" },
-  { .fromFilename = OUTPUT_FILE_NAME,      .toFilename = OUTPUT_FILE_NAME ".1" },
-  { .fromFilename = NULL, .toFilename = NULL }
-};
+SIMPLEQ_HEAD(RotationInfoList, RotationInfo);
 
-static void logRotationInfo() {
-  if (DEBUG_ENABLED) {
-    int i = 0;
-    const struct RotationInfo* rotationInfo = rotationInfoArray;
-    while (rotationInfo->fromFilename != NULL) {
-      DEBUG_PRINTF(
-        "rotationInfo[%d] = { fromFilename = %s, toFilename = %s }\n",
-        i, rotationInfo->fromFilename, rotationInfo->toFilename);
-      ++rotationInfo;
-      ++i;
-    }
+struct RotationInfoList* rotationInfoList;
+
+static sds buildRotationFileName(int fileIndex) {
+  if (fileIndex == 0) {
+    return sdsnew(OUTPUT_FILE_NAME);
+  } else {
+    return sdscatprintf(sdsempty(), "%s.%d", OUTPUT_FILE_NAME, fileIndex);
   }
 }
 
-static void rotateFiles() {
-  const struct RotationInfo* rotationInfo = rotationInfoArray;
+static void buildRotationInfoList() {
+  int i;
+  struct RotationInfo* rotationInfo;
 
-  while (rotationInfo->fromFilename != NULL) {
+  DEBUG_PRINTF("in buildRotationInfoList\n");
+  rotationInfoList = calloc(1, sizeof(struct RotationInfoList));
+  SIMPLEQ_INIT(rotationInfoList);
+
+  if (MAX_OUTPUT_FILES <= 1) {
+    return;
+  }
+
+  for (i = MAX_OUTPUT_FILES - 1; i > 0; --i) {
+    rotationInfo = calloc(1, sizeof(struct RotationInfo));
+    rotationInfo->fromFilename = buildRotationFileName(i - 1);
+    rotationInfo->toFilename = buildRotationFileName(i);
+    SIMPLEQ_INSERT_TAIL(
+      rotationInfoList,
+      rotationInfo,
+      entry);
+    rotationInfo = NULL;
+  }
+
+  if (DEBUG_ENABLED) {
+    i = 0;
+    SIMPLEQ_FOREACH(
+      rotationInfo,
+      rotationInfoList,
+      entry) {
+      DEBUG_PRINTF(
+        "rotationInfo[%d] = { fromFilename = %s, toFilename = %s }\n",
+        i, rotationInfo->fromFilename, rotationInfo->toFilename);
+      ++i;
+    }
+  }
+
+  DEBUG_PRINTF("end buildRotationFileName\n");
+}
+
+static void rotateFiles() {
+  const struct RotationInfo* rotationInfo;
+
+  SIMPLEQ_FOREACH(
+    rotationInfo,
+    rotationInfoList,
+    entry) {
+    DEBUG_PRINTF(
+      "rename fromFilename = %s, toFilename = %s\n",
+      rotationInfo->fromFilename, rotationInfo->toFilename);
+
     rename(rotationInfo->fromFilename, rotationInfo->toFilename);
-    ++rotationInfo;
   }
 }
 
@@ -99,7 +133,7 @@ int main(int argc, char** argv) {
   int intRetVal;
   size_t outputFileSize;
 
-  logRotationInfo();
+  buildRotationInfoList();
 
   if (argc > 1) {
     DEBUG_PRINTF("chdir %s\n", argv[1]);

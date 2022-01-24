@@ -2,7 +2,7 @@ CC = cc
 CFLAGS = -g -Wall
 LDFLAGS =
 
-SRC = simplerotate.c
+SRC = sds.c simplerotate.c
 OBJS = $(SRC:.c=.o)
 
 all: simplerotate
