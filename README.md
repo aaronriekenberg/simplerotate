@@ -8,6 +8,6 @@ When file reaches a max size (1 megabyte) the file is rotated:
 
 A maximum of 10 output files are supported.
 
-The flock() system call is used for simple file locking.
+The flock() system call is used for simple file locking at startup of a file named "lock".
 
 Useful as a simple app to record and rotate log files.
