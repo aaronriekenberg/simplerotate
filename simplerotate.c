@@ -11,7 +11,7 @@
 #include <sys/queue.h>
 #include <unistd.h>
 
-#define DEBUG_ENABLED 1
+#define DEBUG_ENABLED 0
 #define LOCK_FILE_NAME "lock"
 #define OUTPUT_FILE_NAME "output"
 #define MAX_OUTPUT_FILE_SIZE_BYTES (1 * 1024 * 1024)
