@@ -10,9 +10,8 @@
 #include <sys/stat.h>
 #include <sys/queue.h>
 #include <unistd.h>
-#include "sds.h"
 
-#define DEBUG_ENABLED 0
+#define DEBUG_ENABLED 1
 #define LOCK_FILE_NAME "lock"
 #define OUTPUT_FILE_NAME "output"
 #define MAX_OUTPUT_FILE_SIZE_BYTES (1 * 1024 * 1024)
@@ -53,8 +52,8 @@ static size_t getOutputFileBytes() {
 }
 
 struct RotationInfo {
-  sds fromFilename;
-  sds toFilename;
+  char* fromFilename;
+  char* toFilename;
   SIMPLEQ_ENTRY(RotationInfo) entry;
 };
 
@@ -62,12 +61,16 @@ SIMPLEQ_HEAD(RotationInfoList, RotationInfo);
 
 struct RotationInfoList* rotationInfoList;
 
-static sds buildRotationFileName(int fileIndex) {
+static char* buildRotationFileName(int fileIndex) {
+  char* s;
+
   if (fileIndex == 0) {
-    return sdsnew(OUTPUT_FILE_NAME);
+    s = strdup(OUTPUT_FILE_NAME);
   } else {
-    return sdscatprintf(sdsempty(), "%s.%d", OUTPUT_FILE_NAME, fileIndex);
+    asprintf(&s, "%s.%d", OUTPUT_FILE_NAME, fileIndex);
   }
+
+  return s;
 }
 
 static void buildRotationInfoList() {
