@@ -2,7 +2,7 @@
 
 A simple command line app to read from stdin and echo the output to a file "output".
 
-When file reaches a max size (1 megabyte) the file is rotated:
+When file reaches a max size (10 megabytes) the file is rotated:
 * "output.1" -> "output.2"
 * "output" -> "output.1"
 

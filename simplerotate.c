@@ -14,7 +14,7 @@
 #define DEBUG_ENABLED 0
 #define LOCK_FILE_NAME "lock"
 #define OUTPUT_FILE_NAME "output"
-#define MAX_OUTPUT_FILE_SIZE_BYTES (100 * 1024)
+#define MAX_OUTPUT_FILE_SIZE_BYTES (10 * 1024 * 1024)
 #define MAX_OUTPUT_FILES (10)
 
 #define DEBUG_PRINTF(fmt, ...) do { if (DEBUG_ENABLED) printf(fmt, ##__VA_ARGS__); } while (0)
